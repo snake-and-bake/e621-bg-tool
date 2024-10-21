@@ -1,7 +1,3 @@
-"""
-pylint got mad at me so i had to put the doctring here
-"""
-
 from datetime import date
 from pathlib import Path
 from random import randrange
@@ -9,8 +5,6 @@ from time import sleep
 
 import requests
 from e621 import E621
-
-api = E621()
 
 ESSENTIALS = "rating:explicit -young -animated -watersports -scat -rape -hyper -vore -blood -crying -zaush -bestiality -portal"
 ratios = ["0.46", "1", "1.6", "1.77", "2.38"]
@@ -29,7 +23,6 @@ def rest():
 
 
 def run_tutorial(selection):
-
     tutorial = [
         "Welcome to the Tutorial!",
         "This script will download random images from e621 for whatever purpose you need.",
@@ -75,7 +68,6 @@ def single_or_multi():
 
 
 def choose_genders():
-
     options = {"1": "Solo", "2": "Multiple Characters"}
     print(
         "Choose Solo or Multiple Characters:\n1) Solo\n2) Multiple\nNone/Any) Randomly Choose"
@@ -152,6 +144,11 @@ def save_photo(post, ratio):
         raise Exception("Saving photo failed!!!")
 
 
+def grab_posts(query, limit):
+    api = E621()
+    return api.posts.search(query, limit=limit, ignore_pagination=True)
+
+
 def main():
     print("Welcome to the E621 Desktop Background Manager!")
     want_tutorial = input(
@@ -166,7 +163,7 @@ def main():
     while repeat:
         print("How many images do you want to pull?")
         print(f"Please enter a number between 1 and {RETURN_LIMIT}.")
-        count = input(f"Default: 10\n> ")
+        count = input("Default: 10\n> ")
         if count == "" or int(count) < 1:
             count = 10
         elif int(count) > RETURN_LIMIT:
@@ -190,10 +187,7 @@ def main():
         )
         print(f"Query: {query}\nSearching for posts...")
         try:
-            grab_posts = lambda x: x.posts.search(
-                query, limit=RETURN_LIMIT, ignore_pagination=True
-            )
-            posts = grab_posts(api)
+            posts = grab_posts(query, RETURN_LIMIT)
             print(f"Pulled {len(posts)} images!")
             if len(posts) == 0:
                 while len(posts) == 0:
@@ -202,7 +196,7 @@ def main():
                     print("No posts found! Trying again with lower standards...")
                     standards -= 10
                     query = f"{ESSENTIALS} score:>{standards} ratio:{lower}..{upper} {gender_pairing}"
-                    posts = grab_posts(api)
+                    posts = grab_posts(query, RETURN_LIMIT)
             allowable_drop_in_standards = None
 
             while len(posts) < count:
@@ -221,7 +215,7 @@ def main():
 
                 query = f"{ESSENTIALS} score:>{standards} ratio:{lower}..{upper} {gender_pairing}"
                 print(f"Trying again with a score of {standards}...")
-                posts = grab_posts(api)
+                posts = grab_posts(query, RETURN_LIMIT)
                 print(f"Pulled {len(posts)} images!")
                 if (
                     len(posts) > 0
